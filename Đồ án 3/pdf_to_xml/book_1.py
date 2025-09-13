@@ -101,7 +101,7 @@ def pdf_to_dtbook_optimized(pdf_path: str, out_path: str) -> str:
         pagenum.text = str(i)
 
         # Chia thành paragraphs 3-4 câu
-        paragraphs = split_into_paragraphs_optimized(text.replace(f"{detected_section} ", "").strip() if detected_section else text, 4)
+        paragraphs = split_into_paragraphs_optimized(text.replace(f"{detected_section} ", "").strip() if detected_section else text, 10)
 
         for para_text in paragraphs:
             if para_text.strip():
