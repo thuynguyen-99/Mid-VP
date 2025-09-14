@@ -32,11 +32,7 @@ def get_expected_sections_from_pdf(pdf_path):
         return []
 
     hierarchical_sections = [
-        {
-            "title": "LỜI TỰA CỦA TÁC GIẢ (cho ấn bản tại Việt Nam)",
-            "level": 1,
-            "id": "loi_tua",
-        },
+        {"title": "LỜI TỰA CỦA TÁC GIẢ (cho ấn bản tại Việt Nam)", "level": 1, "id": "loi_tua"},
         {"title": "MỞ ĐẦU: Nhà chinh phục mất tích", "level": 1, "id": "mo_dau"},
         {
             "title": "PHẦN I NỖI KINH HOÀNG NGỰ TRỊ THẢO NGUYÊN: 1162-1206",
@@ -122,19 +118,21 @@ def detect_section(text):
 
     for section in expected_sections:
         title = section["title"].strip()
-
+        
+        # Kiểm tra PHẦN
+        if "PHẦN" in title:
+            if "PHẦN I" in title and ("PHẦN I" in text or "PHẦN 1" in text or "NỖI KINH HOÀNG" in text):
+                return section
+            elif "PHẦN II" in title and ("PHẦN II" in text or "PHẦN 2" in text or "THẾ CHIẾN MÔNG CỔ" in text):
+                return section  
+            elif "PHẦN III" in title and ("PHẦN III" in text or "PHẦN 3" in text or "THẾ GIỚI THỨC TỈNH" in text):
+                return section
+        
+        # Kiểm tra exact match
         if title.upper() in text:
             return section
-
-        if "PHẦN" in title:
-            if "PHẦN I" in title and ("PHẦN I" in text or "PHẦN 1" in text):
-                return section
-            elif "PHẦN II" in title and ("PHẦN II" in text or "PHẦN 2" in text):
-                return section
-            elif "PHẦN III" in title and ("PHẦN III" in text or "PHẦN 3" in text):
-                return section
-
-        elif "MỞ ĐẦU" in title and "MỞ ĐẦU" in text:
+        
+        if "MỞ ĐẦU" in title and "MỞ ĐẦU" in text:
             return section
         elif "LỜI TỰA" in title and "LỜI TỰA" in text:
             return section
@@ -147,7 +145,11 @@ def detect_section(text):
                 title_words = title.split()[1:3]
                 if any(word.upper() in text for word in title_words if len(word) > 2):
                     return section
-
+            if chapter_num == "4" and (("SỈ NHỤC" in text and "HOÀNG HÃN" in text) or 
+                                      ("SỈ NHỤ C" in text and "HOÀNG HÃN" in text) or
+                                      ("SỈ NHỤ" in text and "HOÀNG HÃN" in text)):
+                return section
+    
     return None
 
 
@@ -190,37 +192,32 @@ def pdf_to_dtbook_optimized(pdf_path: str, out_path: str) -> str:
         detected_section = detect_section(text)
         if detected_section:
             for idx, section in enumerate(expected_sections):
-                if (
-                    detected_section["title"] == section["title"]
-                    and idx > current_section_idx
-                ):
-                    current_section_idx = idx
-                    section_level = section["level"]
-                    section_id = section["id"]
-
-                    if section_level == 1:
-                        current_level = level1_elements[section_id]
-                        level_stack = [{"level": 1, "element": current_level}]
-                    elif section_level == 2:
-                        parent_id = section.get("parent")
-                        if parent_id and parent_id in level1_elements:
-                            parent_level = level1_elements[parent_id]
-                            level2 = etree.SubElement(
-                                parent_level, "level2", id=section_id
-                            )
-                            h2 = etree.SubElement(level2, "h2", id=f"h2_{section_id}")
-                            h2.text = section["title"]
-                            current_level = level2
-                            level_stack = [
-                                {"level": 1, "element": parent_level},
-                                {"level": 2, "element": level2},
-                            ]
-
-                    section_elements[idx] = current_level
-                    print(
-                        f"   ✅ Tìm thấy: {section['title']} (level {section['level']}, index {idx})"
-                    )
-                    break
+                if detected_section["title"] == section["title"]:
+                    # Chỉ process nếu section chưa được tạo
+                    if idx not in section_elements:
+                        current_section_idx = idx
+                        section_level = section["level"]
+                        section_id = section["id"]
+                        
+                        if section_level == 1:
+                            current_level = level1_elements[section_id]
+                            level_stack = [{"level": 1, "element": current_level}]
+                        elif section_level == 2:
+                            parent_id = section.get("parent")
+                            if parent_id and parent_id in level1_elements:
+                                parent_level = level1_elements[parent_id]
+                                level2 = etree.SubElement(parent_level, "level2", id=section_id)
+                                h2 = etree.SubElement(level2, "h2", id=f"h2_{section_id}")
+                                h2.text = section["title"]
+                                current_level = level2
+                                level_stack = [
+                                    {"level": 1, "element": parent_level},
+                                    {"level": 2, "element": level2}
+                                ]
+                        
+                        section_elements[idx] = current_level
+                        print(f"   ✅ Tìm thấy: {section['title']} (level {section['level']}, index {idx})")
+                        break
 
         pagenum = etree.SubElement(current_level, "pagenum", id=f"page_{i}")
         pagenum.text = str(i)
