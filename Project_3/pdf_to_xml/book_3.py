@@ -7,9 +7,11 @@ from helper import (
     create_dtbook_structure,
     validate_dtbook,
 )
+from pathlib import Path
 
-pdf_path = "thanhcattuhan.pdf"
-xml_path = "thanhcattuhan.xml"
+
+pdf_path = Path(__file__).parent.parent / "data" / "thanh_cat_tu_han.pdf"
+xml_path = "thanh_cat_tu_han.xml"
 book_info = {
     "title": "Thành Cát Tư Hãn và Sự hình thành thế giới hiện đại",
     "author": "Jack Weatherford",

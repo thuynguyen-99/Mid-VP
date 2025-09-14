@@ -10,8 +10,10 @@ from helper import (
     create_dtbook_structure,
     validate_dtbook,
 )
+from pathlib import Path
 
-pdf_path = "ho_quy_ly.pdf"
+
+pdf_path = Path(__file__).parent.parent / "data" / "ho_quy_ly.pdf"
 xml_path = "HoQuyLy.xml"
 book_info = {
     "title": "Hồ Quý Ly",

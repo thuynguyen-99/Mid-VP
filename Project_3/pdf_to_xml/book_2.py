@@ -8,6 +8,10 @@ from helper import (
     create_dtbook_structure,
     validate_dtbook,
 )
+from pathlib import Path
+
+pdf_path = Path(__file__).parent.parent / "data" / "diep_vien_hoan_hao.pdf"
+xml_path = "diep_vien_hoan_hao.xml"
 
 book_info = {
     "title": "Điệp Viên Hoàn Hảo",
@@ -144,8 +148,6 @@ def pdf_to_dtbook_optimized(pdf_path, out_path):
 
 
 if __name__ == "__main__":
-    pdf_path = "DiepVienHoanHao.pdf"
-    xml_path = "DiepVienHoanHao_Optimized.xml"
     try:
         output_file = pdf_to_dtbook_optimized(pdf_path, xml_path)
         validate_dtbook(output_file)
