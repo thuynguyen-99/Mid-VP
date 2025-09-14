@@ -1,10 +1,13 @@
-
 from pypdf import PdfReader
 from lxml import etree
 import re
-import math
 import uuid
-from helper import clean_page_text, split_into_paragraphs_optimized, create_dtbook_structure, validate_dtbook
+from helper import (
+    clean_page_text,
+    split_into_paragraphs_optimized,
+    create_dtbook_structure,
+    validate_dtbook,
+)
 
 book_info = {
     "title": "Điệp Viên Hoàn Hảo",
@@ -15,7 +18,7 @@ book_info = {
     "subject": "Tiểu thuyết",
     "language": "vi-VN",
     "identifier": f"dtb-{uuid.uuid4()}",
-    "total_page_count": "657"
+    "total_page_count": "657",
 }
 
 
@@ -35,7 +38,7 @@ def detect_section(text):
         (r"^(CHƯƠNG 6|Chương 6)", "Chương 6 - Những vai trò mập mờ: tháng 4/1975"),
         (r"^(CHƯƠNG 7|Chương 7)", "Chương 7 - Dưới Bóng Người Cha"),
         (r"^(CHƯƠNG KẾT|Chương kết)", "Chương kết - Một Cuộc Đời Hai Mặt Khác Thường"),
-        (r"^(LỜI CẢM ƠN|Lời Cám Ơn)", "Lời Cám Ơn")
+        (r"^(LỜI CẢM ƠN|Lời Cám Ơn)", "Lời Cám Ơn"),
     ]
 
     for pattern, section_name in section_patterns:
@@ -43,6 +46,7 @@ def detect_section(text):
             return section_name
 
     return None
+
 
 def pdf_to_dtbook_optimized(pdf_path, out_path):
     """Chuyển đổi PDF sang DTBook với sections cố định và paragraphs optimized"""
@@ -63,7 +67,7 @@ def pdf_to_dtbook_optimized(pdf_path, out_path):
         "Chương 6 - Những vai trò mập mờ: tháng 4/1975",
         "Chương 7 - Dưới Bóng Người Cha",
         "Chương kết - Một Cuộc Đời Hai Mặt Khác Thường",
-        "Lời Cám Ơn"
+        "Lời Cám Ơn",
     ]
 
     # Tạo containers
@@ -83,8 +87,8 @@ def pdf_to_dtbook_optimized(pdf_path, out_path):
             container = bodymatter
 
         # Tạo level1 cho section
-        level1 = etree.SubElement(container, "level1", id=f"sec_{i+1}")
-        h1 = etree.SubElement(level1, "h1", id=f"h1_{i+1}")
+        level1 = etree.SubElement(container, "level1", id=f"sec_{i + 1}")
+        h1 = etree.SubElement(level1, "h1", id=f"h1_{i + 1}")
         h1.text = section_title
         section_elements[i] = level1
 
@@ -138,15 +142,16 @@ def pdf_to_dtbook_optimized(pdf_path, out_path):
 
     return out_path
 
+
 if __name__ == "__main__":
-    pdf_path = "/Users/thuynguyen/Downloads/c491ie1bb87p-vic3aan-hoc3a0n-he1baa3o-larry-berman.pdf"
+    pdf_path = "DiepVienHoanHao.pdf"
     xml_path = "DiepVienHoanHao_Optimized.xml"
     try:
         output_file = pdf_to_dtbook_optimized(pdf_path, xml_path)
         validate_dtbook(output_file)
 
-
     except Exception as e:
         print(f"❌ Lỗi: {e}")
         import traceback
+
         traceback.print_exc()
