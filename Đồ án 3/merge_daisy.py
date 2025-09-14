@@ -5,8 +5,8 @@ import re
 from lxml import etree
 
 NS = {
-    "oeb": "http://openebook.org/namespaces/oeb-package/1.0/",  # OEB 1.2
-    "opf": "http://www.idpf.org/2007/opf",  # OPF 2.0
+    "oeb": "http://openebook.org/namespaces/oeb-package/1.0/",
+    "opf": "http://www.idpf.org/2007/opf",
     "dc": "http://purl.org/dc/elements/1.1/",
     "ncx": "http://www.daisy.org/z3986/2005/ncx/",
 }
